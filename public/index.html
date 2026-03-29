@@ -20,95 +20,115 @@
 
         <div class="main-content-layout">
             <figure id="video-wrapper" class="video-container">
-                <video id="video-player" preload="metadata" poster="media/preview/thumbnail.jpg" playsinline
-                    controls>
-                        <source src="media/videos/video_1080p.webm" type="video/webm">
-                        <source src="media/videos/video_1080p.mp4" type="video/mp4">
-                        <track src="media/subs/subs_esp.vtt" kind="subtitles" srclang="es" label="Español" default>
-                        <track src="media/subs/subs_eng.vtt" kind="subtitles" srclang="en" label="English">
-                        <track src="media/subs/subs_cat.vtt" kind="subtitles" srclang="ca" label="Català">
-                        <track src="media/subs/subs_ger.vtt" kind="subtitles" srclang="de" label="Deutsch">
-                        <track src="media/vtt/chapters.vtt" kind="chapters" srclang="es" label="Capítulos" default>
-                        <track src="media/vtt/metadata.vtt" kind="metadata" label="Metadata">
-                        <p>Fallback: Su navegador no soporta HTML5. <a href="media/videos/video_1080p.mp4">Descargue el
-                                archivo</a>.</p>
-                    </video>
+                <video id="video-player" preload="metadata" poster="media/preview/thumbnail.jpg" playsinline controls>
+                    <source src="media/videos/video_1080p.webm" type="video/webm">
+                    <source src="media/videos/video_1080p.mp4" type="video/mp4">
+                    <p>Fallback: Su navegador no soporta HTML5. <a href="media/videos/video_1080p.mp4">Descargue el
+                            archivo</a>.</p>
+                </video>
 
-                    <div id="error-overlay" class="overlay hidden">
-                        <span class="material-symbols-rounded overlay-icon">error</span>
-                        <p id="error-message">Ha ocurrido un error reproduciendo el vídeo.</p>
+                <div id="error-overlay" class="overlay hidden">
+                    <span class="material-symbols-rounded overlay-icon">error</span>
+                    <p id="error-message">Ha ocurrido un error reproduciendo el vídeo.</p>
+                </div>
+
+                <div id="loading-overlay" class="overlay hidden">
+                    <div class="spinner"></div>
+                </div>
+
+                <div id="video-controls" class="controls-container" data-state="hidden" style="display: none;">
+                    <div class="progress-wrapper" id="progress-wrapper">
+                        <div id="chapters-container" class="chapters-container"></div>
+                        <div id="chapter-hover-highlight" class="chapter-hover-highlight hidden"></div>
+                        <div id="chapter-tooltip" class="chapter-tooltip hidden"></div>
+                        <input type="range" id="progress-bar" class="progress-bar" min="0" max="100" value="0"
+                            step="0.1">
+                        <div class="progress-filled" id="progress-filled"></div>
                     </div>
 
-                    <div id="loading-overlay" class="overlay hidden">
-                        <div class="spinner"></div>
-                    </div>
+                    <div class="controls-main">
+                        <div class="controls-left">
+                            <button id="play-pause-btn" class="control-btn" title="Reproducir/Pausar">
+                                <span class="material-symbols-rounded">play_arrow</span>
+                            </button>
 
-                    <div id="video-controls" class="controls-container" data-state="hidden" style="display: none;">
-                        <div class="progress-wrapper" id="progress-wrapper">
-                            <div id="chapters-container" class="chapters-container"></div>
-                            <div id="chapter-hover-highlight" class="chapter-hover-highlight hidden"></div>
-                            <div id="chapter-tooltip" class="chapter-tooltip hidden"></div>
-                            <input type="range" id="progress-bar" class="progress-bar" min="0" max="100" value="0"
-                                step="0.1">
-                            <div class="progress-filled" id="progress-filled"></div>
-                        </div>
-
-                        <div class="controls-main">
-                            <div class="controls-left">
-                                <button id="play-pause-btn" class="control-btn" title="Reproducir/Pausar">
-                                    <span class="material-symbols-rounded">play_arrow</span>
+                            <div class="volume-container">
+                                <button id="mute-btn" class="control-btn" title="Silenciar">
+                                    <span class="material-symbols-rounded">volume_up</span>
                                 </button>
-
-                                <div class="volume-container">
-                                    <button id="mute-btn" class="control-btn" title="Silenciar">
-                                        <span class="material-symbols-rounded">volume_up</span>
-                                    </button>
-                                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="1"
-                                        step="0.05" value="0.5">
-                                </div>
-
-                                <div class="time-display">
-                                    <span id="current-time">00:00</span> / <span id="duration">00:00</span>
-                                </div>
+                                <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.05"
+                                    value="0.5">
                             </div>
 
-                            <div class="controls-right">
-                                <div class="cc-container">
-                                    <button id="cc-btn" class="control-btn" title="Subtítulos">
-                                        <span class="material-symbols-rounded">closed_caption</span>
-                                    </button>
-                                    <div id="cc-menu" class="cc-menu hidden">
-                                        <div class="cc-header">Subtítulos</div>
-                                        <ul id="cc-list">
-                                            <!-- Los elementos li se generarán por JavaScript -->
-                                        </ul>
-                                    </div>
-                                </div>
-                                <button id="fullscreen-btn" class="control-btn" title="Pantalla completa">
-                                    <span class="material-symbols-rounded">fullscreen</span>
-                                </button>
+                            <div class="time-display">
+                                <span id="current-time">00:00</span> / <span id="duration">00:00</span>
                             </div>
                         </div>
-                    </div>
-                </figure>
 
-                <div class="glass-panel" id="ejemplo-section">
-                    <h2 class="side-info-title" style="margin-top: 0;">Ejemplo</h2>
-                    <div id="synchronized-info" class="sync-info-container">
-                        <div class="sync-item">
-                            <span class="sync-label" id="escudo-label"></span>
-                            <img id="escudo-img" src="" alt="Escudo">
-                        </div>
-                        <div class="sync-item">
-                            <span class="sync-label" id="entrenador-label"></span>
-                            <img id="entrenador-img" src="" alt="Entrenador">
-                        </div>
-                        <div class="sync-item">
-                            <span class="sync-label" id="equipo-label"></span>
-                            <img id="equipo-img" src="" alt="Jugadores">
+                        <div class="controls-right">
+                            <div class="cc-container menu-container">
+                                <button id="cc-btn" class="control-btn" title="Subtítulos">
+                                    <span class="material-symbols-rounded">closed_caption</span>
+                                </button>
+                                <div id="cc-menu" class="cc-menu popup-menu hidden">
+                                    <div class="cc-header">Subtítulos</div>
+                                    <ul id="cc-list">
+                                        <!-- Los elementos li se generarán por JavaScript -->
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="settings-container menu-container" style="position: relative;">
+                                <button id="quality-btn" class="control-btn" title="Calidad">
+                                    <span class="material-symbols-rounded">settings</span>
+                                </button>
+                                <div id="quality-menu" class="cc-menu popup-menu hidden">
+                                    <div class="cc-header" id="quality-header">Calidad</div>
+                                    <ul id="quality-list-main" class="menu-list">
+                                        <li data-action="basic" class="menu-item-with-arrow">
+                                            <span>Básico (Sin ABR)</span>
+                                            <span class="material-symbols-rounded"
+                                                style="font-size: 18px;">chevron_right</span>
+                                        </li>
+                                        <li data-action="hls"><span>ABR HLS</span></li>
+                                        <li data-action="dash"><span>ABR MPEG-DASH</span></li>
+                                    </ul>
+                                    <ul id="quality-list-basic" class="menu-list hidden">
+                                        <li data-action="back" class="menu-item-back">
+                                            <span class="material-symbols-rounded"
+                                                style="font-size: 18px; margin-right: 4px;">chevron_left</span>
+                                            <span>Atrás</span>
+                                        </li>
+                                        <li data-quality="1080p" class="active"><span>1080p</span></li>
+                                        <li data-quality="720p"><span>720p</span></li>
+                                        <li data-quality="360p"><span>360p</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button id="fullscreen-btn" class="control-btn" title="Pantalla completa">
+                                <span class="material-symbols-rounded">fullscreen</span>
+                            </button>
                         </div>
                     </div>
                 </div>
+            </figure>
+
+            <div class="glass-panel" id="ejemplo-section">
+                <h2 class="side-info-title" style="margin-top: 0;">Ejemplo</h2>
+                <div id="synchronized-info" class="sync-info-container">
+                    <div class="sync-item">
+                        <span class="sync-label" id="escudo-label"></span>
+                        <img id="escudo-img" src="" alt="Escudo">
+                    </div>
+                    <div class="sync-item">
+                        <span class="sync-label" id="entrenador-label"></span>
+                        <img id="entrenador-img" src="" alt="Entrenador">
+                    </div>
+                    <div class="sync-item">
+                        <span class="sync-label" id="equipo-label"></span>
+                        <img id="equipo-img" src="" alt="Jugadores">
+                    </div>
+                </div>
+            </div>
 
             <aside id="side-info" class="side-info-section">
                 <h2 class="side-info-title">Info</h2>
@@ -162,6 +182,9 @@
             </aside>
         </div>
     </div>
+    <!-- Libs-->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <script src="script.js"></script>
 </body>
 

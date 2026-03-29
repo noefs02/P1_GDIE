@@ -17,6 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingOverlay = document.getElementById('loading-overlay');
     const videoControls = document.getElementById('video-controls');
 
+    const TRACKS_CONFIG = [
+        { src: "media/subs/subs_esp.vtt", kind: "subtitles", srclang: "es", label: "Español", default: true },
+        { src: "media/subs/subs_eng.vtt", kind: "subtitles", srclang: "en", label: "English" },
+        { src: "media/subs/subs_cat.vtt", kind: "subtitles", srclang: "ca", label: "Català" },
+        { src: "media/subs/subs_ger.vtt", kind: "subtitles", srclang: "de", label: "Deutsch" },
+        { src: "media/vtt/chapters.vtt", kind: "chapters", srclang: "es", label: "Capítulos", default: true },
+        { src: "media/vtt/metadata.vtt", kind: "metadata", label: "Metadata" }
+    ];
+
     // Elementos de capítulos
     const chaptersContainer = document.getElementById('chapters-container');
     const chapterHighlight = document.getElementById('chapter-hover-highlight');
@@ -182,151 +191,361 @@ document.addEventListener('DOMContentLoaded', () => {
     const ccMenu = document.getElementById('cc-menu');
     const ccList = document.getElementById('cc-list');
 
-    // Obtener las pistas cuando el vídeo haya cargado sus metadatos o después
-    const tracks = video.textTracks;
+    let renderCCMenuHandler = null;
 
-    const renderCCMenu = () => {
-        ccList.innerHTML = '';
+    const initSubtitles = () => {
+        const tracks = video.textTracks;
 
-        // Opción de Desactivado
-        const offLi = document.createElement('li');
-        offLi.textContent = 'Desactivado';
+        const renderCCMenu = () => {
+            ccList.innerHTML = '';
 
-        // Determinar si todos están inactivos ('hidden' o 'disabled')
-        let anyActive = false;
-        for (let i = 0; i < tracks.length; i++) {
-            if (tracks[i].kind === 'subtitles' && tracks[i].mode === 'showing') {
-                anyActive = true;
-                break;
-            }
-        }
+            // Opción de Desactivado
+            const offLi = document.createElement('li');
+            offLi.textContent = 'Desactivado';
 
-        if (!anyActive) {
-            offLi.classList.add('active');
-        }
-
-        offLi.addEventListener('click', () => {
+            // Determinar si todos están inactivos ('hidden' o 'disabled')
+            let anyActive = false;
             for (let i = 0; i < tracks.length; i++) {
-                if (tracks[i].kind === 'subtitles') {
-                    tracks[i].mode = 'hidden';
+                if (tracks[i].kind === 'subtitles' && tracks[i].mode === 'showing') {
+                    anyActive = true;
+                    break;
                 }
             }
-            ccMenu.classList.add('hidden');
-            renderCCMenu();
-        });
 
-        ccList.appendChild(offLi);
-
-        // Opciones por cada idioma (track)
-        for (let i = 0; i < tracks.length; i++) {
-            const track = tracks[i];
-            if (track.kind !== 'subtitles') continue;
-
-            const li = document.createElement('li');
-            li.textContent = track.label || track.language || `Pista ${i + 1}`;
-
-            if (track.mode === 'showing') {
-                li.classList.add('active');
+            if (!anyActive) {
+                offLi.classList.add('active');
             }
 
-            li.addEventListener('click', () => {
-                // Ocultar todas las pistas de subtítulos
-                for (let j = 0; j < tracks.length; j++) {
-                    if (tracks[j].kind === 'subtitles') {
-                        tracks[j].mode = 'hidden';
+            offLi.addEventListener('click', () => {
+                for (let i = 0; i < tracks.length; i++) {
+                    if (tracks[i].kind === 'subtitles') {
+                        tracks[i].mode = 'disabled';
                     }
                 }
-                // Mostrar solo la pista seleccionada
-                track.mode = 'showing';
                 ccMenu.classList.add('hidden');
                 renderCCMenu();
             });
 
-            ccList.appendChild(li);
+            ccList.appendChild(offLi);
+
+            // Opciones por cada idioma (track)
+            for (let i = 0; i < tracks.length; i++) {
+                const track = tracks[i];
+                if (track.kind === 'chapters' || track.kind === 'metadata') continue;
+                if (track.kind !== 'subtitles') continue;
+
+                const li = document.createElement('li');
+                li.textContent = track.label || track.language || `Pista ${i + 1}`;
+
+                if (track.mode === 'showing') {
+                    li.classList.add('active');
+                }
+
+                li.addEventListener('click', () => {
+                    // Ocultar todas las pistas de subtítulos
+                    for (let j = 0; j < tracks.length; j++) {
+                        if (tracks[j].kind === 'subtitles') {
+                            tracks[j].mode = 'disabled';
+                        }
+                    }
+                    // Mostrar solo la pista seleccionada
+                    track.mode = 'showing';
+                    ccMenu.classList.add('hidden');
+                    renderCCMenu();
+                });
+
+                ccList.appendChild(li);
+            }
+        };
+
+        // Si cambian nativamente, volver a renderizar
+        if (renderCCMenuHandler) {
+            tracks.removeEventListener('change', renderCCMenuHandler);
         }
+        renderCCMenuHandler = renderCCMenu;
+        tracks.addEventListener('change', renderCCMenuHandler);
+
+        // Inicializamos el menú base
+        renderCCMenu();
     };
 
-    // Inicializamos el menú base
-    renderCCMenu();
+    // Configuración de Calidad y ABR
+    const qualityBtn = document.getElementById('quality-btn');
+    const qualityMenu = document.getElementById('quality-menu');
+    const qualityListMain = document.getElementById('quality-list-main');
+    const qualityListBasic = document.getElementById('quality-list-basic');
+    const qualityHeader = document.getElementById('quality-header');
 
-    // Si cambian nativamente, volver a renderizar
-    tracks.addEventListener('change', renderCCMenu);
+    let currentHlsInstance = null;
+    let currentDashInstance = null;
+    let currentMode = 'basic'; // 'basic', 'hls', 'dash'
 
     ccBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         ccMenu.classList.toggle('hidden');
+        if (qualityMenu) qualityMenu.classList.add('hidden');
     });
 
-    // Cerrar menú si hacemos click fuera de la caja cc-container
+    // Cerrar menús si hacemos click fuera
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.cc-container')) {
-            ccMenu.classList.add('hidden');
+        if (!e.target.closest('.menu-container')) {
+            if (ccMenu) ccMenu.classList.add('hidden');
+            if (qualityMenu) qualityMenu.classList.add('hidden');
         }
     });
 
-    // Capítulos
-    const chaptersTrack = Array.from(video.textTracks).find(track => track.kind === 'chapters');
-    let chapterCues = [];
+    // Lógica del menú de calidad
+    if (qualityBtn && qualityMenu) {
+        qualityBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            qualityMenu.classList.toggle('hidden');
+            if (ccMenu) ccMenu.classList.add('hidden'); // Cerrar subtítulos
 
-    if (chaptersTrack) {
-        chaptersTrack.mode = 'hidden';
-
-        const renderChapters = () => {
-            if (!video.duration || !chaptersTrack.cues) return;
-            chapterCues = Array.from(chaptersTrack.cues);
-            chaptersContainer.innerHTML = '';
-
-            chapterCues.forEach((cue, index, array) => {
-                if (index === array.length - 1) return; // No marker for the very end
-                const marker = document.createElement('div');
-                marker.classList.add('chapter-marker');
-                marker.style.left = `${(cue.endTime / video.duration) * 100}%`;
-                chaptersContainer.appendChild(marker);
-            });
-        };
-
-        chaptersTrack.addEventListener('cuechange', renderChapters);
-        video.addEventListener('loadedmetadata', renderChapters);
-
-        // Si los metadatos ya están listos
-        if (video.readyState >= 1) {
-            setTimeout(renderChapters, 100);
-        }
-
-        // Hover events para progreso
-        progressWrapper.addEventListener('mousemove', (e) => {
-            if (!video.duration || chapterCues.length === 0) return;
-
-            const rect = progressWrapper.getBoundingClientRect();
-            let percent = (e.clientX - rect.left) / rect.width;
-            percent = Math.max(0, Math.min(1, percent));
-
-            const hoverTime = percent * video.duration;
-            const activeCue = chapterCues.find(c => hoverTime >= c.startTime && hoverTime <= c.endTime);
-
-            if (activeCue) {
-                chapterHighlight.classList.remove('hidden');
-                chapterTooltip.classList.remove('hidden');
-
-                const startPercent = (activeCue.startTime / video.duration) * 100;
-                const endPercent = (activeCue.endTime / video.duration) * 100;
-
-                chapterHighlight.style.left = `${startPercent}%`;
-                chapterHighlight.style.width = `${endPercent - startPercent}%`;
-
-                chapterTooltip.textContent = activeCue.text;
-                chapterTooltip.style.left = `${percent * 100}%`;
-            } else {
-                chapterHighlight.classList.add('hidden');
-                chapterTooltip.classList.add('hidden');
+            // Resetea a la vista principal al abrir
+            if (!qualityMenu.classList.contains('hidden')) {
+                qualityListMain.classList.remove('hidden');
+                qualityListBasic.classList.add('hidden');
+                qualityHeader.textContent = 'Calidad';
             }
         });
 
-        progressWrapper.addEventListener('mouseleave', () => {
-            chapterHighlight.classList.add('hidden');
-            chapterTooltip.classList.add('hidden');
+        // Click en menú principal (Básico, HLS, DASH)
+        qualityListMain.addEventListener('click', (e) => {
+            const li = e.target.closest('li');
+            if (!li) return;
+            const action = li.getAttribute('data-action');
+
+            if (action === 'basic') {
+                qualityListMain.classList.add('hidden');
+                qualityListBasic.classList.remove('hidden');
+                qualityHeader.textContent = 'Básico';
+            } else if (action === 'hls' || action === 'dash') {
+                // Marcar la opción principal como activa visualmente (en el propio main menu no hay active visible, pero lo podemos añadir al item subyacente o limpiar si quisieramos)
+                qualityListMain.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+                li.classList.add('active');
+                qualityMenu.classList.add('hidden');
+                qualityListBasic.querySelectorAll('li[data-quality]').forEach(el => el.classList.remove('active')); // Reset sub-menu
+
+                switchABRProtocol(action);
+            }
         });
+
+        // Click en menú básico (1080p, 720p, 360p, back)
+        qualityListBasic.addEventListener('click', (e) => {
+            const li = e.target.closest('li');
+            if (!li) return;
+            const action = li.getAttribute('data-action');
+
+            if (action === 'back') {
+                qualityListMain.classList.remove('hidden');
+                qualityListBasic.classList.add('hidden');
+                qualityHeader.textContent = 'Calidad';
+                return;
+            }
+
+            const quality = li.getAttribute('data-quality');
+            if (quality) {
+                // Marcar activo en Básico
+                qualityListBasic.querySelectorAll('li[data-quality]').forEach(el => el.classList.remove('active'));
+                li.classList.add('active');
+                qualityMenu.classList.add('hidden');
+
+                // Limpiar activaención en HLS/DASH
+                qualityListMain.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+                const basicActionLi = qualityListMain.querySelector('[data-action="basic"]');
+                if (basicActionLi) basicActionLi.classList.add('active');
+
+                switchABRProtocol('basic', quality);
+            }
+        });
+
+        function destroyABR() {
+            if (currentHlsInstance) {
+                currentHlsInstance.destroy();
+                currentHlsInstance = null;
+            }
+            if (currentDashInstance) {
+                currentDashInstance.destroy();
+                currentDashInstance = null;
+            }
+        }
+
+        function switchABRProtocol(protocol, basicQuality = '1080p') {
+            if (currentMode === protocol && protocol !== 'basic') return; // Mismo protocolo, ignorar
+            currentMode = protocol;
+
+            const currentTime = video.currentTime;
+            const isPaused = video.paused;
+            const playbackRate = video.playbackRate;
+
+            destroyABR(); // Limpiar basura del buffer anterior
+            video.removeAttribute('src'); // IMPORTANT: Eliminar blobs revocados antes de que video.load() lance un error 404 en Network
+
+            // Preparar el handler de autostart
+            const startPlayback = () => {
+                video.currentTime = currentTime;
+                video.playbackRate = playbackRate;
+                if (!isPaused) {
+                    video.play().catch(e => console.error("Error al reproducir auto", e));
+                }
+            };
+
+            if (protocol === 'basic') {
+                // Volver a usar source native
+                const webmSource = video.querySelector('source[type="video/webm"]');
+                const mp4Source = video.querySelector('source[type="video/mp4"]');
+
+                if (webmSource) webmSource.src = `media/videos/video_${basicQuality}.webm`;
+                if (mp4Source) mp4Source.src = `media/videos/video_${basicQuality}.mp4`;
+
+                video.load();
+                video.addEventListener('loadeddata', function onLoaded() {
+                    injectAndSetupTracks();
+                    startPlayback();
+                    video.removeEventListener('loadeddata', onLoaded);
+                }, { once: true });
+
+            } else if (protocol === 'hls') {
+                const hlsUrl = 'media/videos/ABR/master.m3u8';
+
+                if (window.Hls && window.Hls.isSupported()) {
+                    // Limpiar las fuentes nativas para que no confundan a hls.js
+                    const sources = video.querySelectorAll('source');
+                    sources.forEach(src => src.removeAttribute('src'));
+                    video.load();
+
+                    const hls = new window.Hls();
+                    currentHlsInstance = hls;
+                    hls.loadSource(hlsUrl);
+                    hls.attachMedia(video);
+
+                    hls.on(window.Hls.Events.MANIFEST_PARSED, function () {
+                        injectAndSetupTracks();
+                        startPlayback();
+                    });
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Fallback nativo (iOS, Safari)
+                    const sources = video.querySelectorAll('source');
+                    sources.forEach(src => src.removeAttribute('src'));
+                    video.src = hlsUrl;
+                    video.addEventListener('loadedmetadata', function onLoaded() {
+                        injectAndSetupTracks();
+                        startPlayback();
+                        video.removeEventListener('loadedmetadata', onLoaded);
+                    }, { once: true });
+                } else {
+                    alert("Lo sentimos, tu navegador no es compatible con HLS.");
+                }
+
+            } else if (protocol === 'dash') {
+                const dashUrl = 'media/videos/ABR/manifest.mpd';
+
+                if (typeof dashjs !== 'undefined') {
+                    // Limpiar fuentes
+                    const sources = video.querySelectorAll('source');
+                    sources.forEach(src => src.removeAttribute('src'));
+                    video.load();
+
+                    currentDashInstance = dashjs.MediaPlayer().create();
+                    currentDashInstance.initialize(video, dashUrl, false);
+
+                    currentDashInstance.on(dashjs.MediaPlayer.events.STREAM_INITIALIZED, function () {
+                        injectAndSetupTracks();
+                        startPlayback();
+                    });
+                } else {
+                    alert("dashjs no se cargó correctamente o tu navegador no es compatible con MPEG-DASH.");
+                }
+            }
+        }
     }
+
+    // Capítulos
+    let chapterHoverHandler = null;
+    let progressLeaveHandler = null;
+    let chaptersRenderHandler = null;
+    let chaptersLoadHandler = null;
+    
+    const initChapters = () => {
+        const chaptersTrack = Array.from(video.textTracks).find(track => track.kind === 'chapters');
+        let chapterCues = [];
+
+        chaptersContainer.innerHTML = '';
+        if (chapterHoverHandler) progressWrapper.removeEventListener('mousemove', chapterHoverHandler);
+        if (progressLeaveHandler) progressWrapper.removeEventListener('mouseleave', progressLeaveHandler);
+
+        if (chaptersTrack) {
+            chaptersTrack.mode = 'hidden';
+
+            const renderChapters = () => {
+                if (!video.duration || !chaptersTrack.cues) return;
+                chapterCues = Array.from(chaptersTrack.cues);
+                chaptersContainer.innerHTML = '';
+
+                chapterCues.forEach((cue, index, array) => {
+                    if (index === array.length - 1) return; // No marker for the very end
+                    const marker = document.createElement('div');
+                    marker.classList.add('chapter-marker');
+                    marker.style.left = `${(cue.endTime / video.duration) * 100}%`;
+                    chaptersContainer.appendChild(marker);
+                });
+            };
+
+            if (chaptersRenderHandler) {
+                chaptersTrack.removeEventListener('cuechange', chaptersRenderHandler);
+                video.removeEventListener('loadedmetadata', chaptersRenderHandler);
+            }
+            if (chaptersLoadHandler) {
+                chaptersTrack.removeEventListener('load', chaptersLoadHandler);
+            }
+
+            chaptersRenderHandler = renderChapters;
+            chaptersLoadHandler = renderChapters;
+
+            chaptersTrack.addEventListener('cuechange', chaptersRenderHandler);
+            video.addEventListener('loadedmetadata', chaptersRenderHandler);
+            chaptersTrack.addEventListener('load', chaptersLoadHandler);
+
+            if (video.readyState >= 1) {
+                setTimeout(renderChapters, 100);
+            }
+
+            chapterHoverHandler = (e) => {
+                if (!video.duration || chapterCues.length === 0) return;
+
+                const rect = progressWrapper.getBoundingClientRect();
+                let percent = (e.clientX - rect.left) / rect.width;
+                percent = Math.max(0, Math.min(1, percent));
+
+                const hoverTime = percent * video.duration;
+                const activeCue = chapterCues.find(c => hoverTime >= c.startTime && hoverTime <= c.endTime);
+
+                if (activeCue) {
+                    chapterHighlight.classList.remove('hidden');
+                    chapterTooltip.classList.remove('hidden');
+
+                    const startPercent = (activeCue.startTime / video.duration) * 100;
+                    const endPercent = (activeCue.endTime / video.duration) * 100;
+
+                    chapterHighlight.style.left = `${startPercent}%`;
+                    chapterHighlight.style.width = `${endPercent - startPercent}%`;
+
+                    chapterTooltip.textContent = activeCue.text;
+                    chapterTooltip.style.left = `${percent * 100}%`;
+                } else {
+                    chapterHighlight.classList.add('hidden');
+                    chapterTooltip.classList.add('hidden');
+                }
+            };
+            progressWrapper.addEventListener('mousemove', chapterHoverHandler);
+
+            progressLeaveHandler = () => {
+                chapterHighlight.classList.add('hidden');
+                chapterTooltip.classList.add('hidden');
+            };
+            progressWrapper.addEventListener('mouseleave', progressLeaveHandler);
+        }
+    };
 
     // -- Ocultar controles por inactividad --
     let hideControlsTimeout;
@@ -365,190 +584,237 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // -- Lógica de Cuadrícula de Formaciones --
     const formationGrid = document.getElementById('formation-grid');
-    const metadataTrackEl = document.querySelector('track[kind="metadata"]');
+    
+    const syncContainer = document.getElementById('synchronized-info');
+    const escudoLabel = document.getElementById('escudo-label');
+    const escudoImg = document.getElementById('escudo-img');
+    const entrenadorLabel = document.getElementById('entrenador-label');
+    const entrenadorImg = document.getElementById('entrenador-img');
+    const equipoLabel = document.getElementById('equipo-label');
+    const equipoImg = document.getElementById('equipo-img');
 
-    if (metadataTrackEl && formationGrid) {
-        const metadataTrack = metadataTrackEl.track;
-        metadataTrack.mode = 'hidden'; // Obliga al navegador a procesar los cues sin mostrar nada
+    const sideInfo = document.getElementById('side-info');
+    const formationText = document.getElementById('formation-text');
+    const tacticsImg = document.getElementById('tactics-img');
 
-        const renderGrid = () => {
-            if (!metadataTrack.cues || metadataTrack.cues.length === 0) return;
-            // Solo dibujamos si el grid está vacío
-            if (formationGrid.children.length > 0) return;
+    const attrContainer = document.getElementById('attributes-container');
+    const stylesContainer = document.getElementById('styles-container');
 
-            Array.from(metadataTrack.cues).forEach(cue => {
-                try {
-                    const data = JSON.parse(cue.text);
-                    const formationId = data.id.replace('fmt-', '');
+    const styleColors = {
+        'posesión': '#3b82f6',
+        'juego posicional': '#8b5cf6',
+        'robo salida': '#f59e0b',
+        'directo': '#ef4444',
+        'contraataque': '#10b981',
+        'presión alta': '#f43fdfff',
+        'juego vertical': '#08a3ebff',
+        'juego interior': '#46ef49ff',
+        'combinativo': '#06b6d4',
+        'juego directo': '#cdbd2fff'
+    };
 
-                    const item = document.createElement('div');
-                    item.className = 'formation-item';
-                    item.setAttribute('data-id', data.id);
-                    item.title = data.payload.title || formationId;
+    const attrMapping = {
+        'alta': { width: '100%', color: '#ef4444' },
+        'ofensiva': { width: '100%', color: '#ef4444' },
+        'media': { width: '50%', color: '#eab308' },
+        'equilibrada': { width: '50%', color: '#eab308' },
+        'baja': { width: '15%', color: '#3b82f6' },
+        'defensiva': { width: '15%', color: '#3b82f6' }
+    };
+    
+    let metadataRenderHandler = null;
+    let metadataCueHandler = null;
 
-                    const fallbackText = document.createElement('span');
-                    fallbackText.textContent = formationId;
-                    fallbackText.className = 'fallback-text';
-                    item.appendChild(fallbackText);
+    const initMetadata = () => {
+        const metadataTrackEl = document.querySelector('track[kind="metadata"]');
+        
+        if (metadataTrackEl && formationGrid) {
+            const metadataTrack = metadataTrackEl.track;
+            if (metadataTrack) metadataTrack.mode = 'hidden'; // Obliga al navegador a procesar los cues sin mostrar nada
 
-                    const labelText = document.createElement('span');
-                    labelText.className = 'formation-label';
-                    labelText.textContent = formationId; // Nombre de la formación encima
-                    item.appendChild(labelText);
+            const renderGrid = () => {
+                if (!metadataTrack || !metadataTrack.cues || metadataTrack.cues.length === 0) return;
+                // Solo dibujamos si el grid está vacío
+                if (formationGrid.children.length > 0) return;
 
-                    const img = document.createElement('img');
-                    img.src = `media/images/formations/${formationId}.png`;
-                    img.alt = data.payload.title;
-                    img.onload = () => { fallbackText.style.display = 'none'; };
-                    img.onerror = () => { img.style.display = 'none'; };
+                Array.from(metadataTrack.cues).forEach(cue => {
+                    try {
+                        const data = JSON.parse(cue.text);
+                        const formationId = data.id.replace('fmt-', '');
 
-                    item.appendChild(img);
+                        const item = document.createElement('div');
+                        item.className = 'formation-item';
+                        item.setAttribute('data-id', data.id);
+                        item.title = data.payload.title || formationId;
 
-                    // pequeño margen (0.1s)para asegurar que el navegador detecte que hemos entrado en el nuevo 'cue'
-                    item.addEventListener('click', () => {
-                        video.currentTime = cue.startTime + 0.1;
-                        video.play().catch(() => { });
-                    });
+                        const fallbackText = document.createElement('span');
+                        fallbackText.textContent = formationId;
+                        fallbackText.className = 'fallback-text';
+                        item.appendChild(fallbackText);
 
-                    formationGrid.appendChild(item);
-                } catch (e) {
-                    console.error("Error al parsear metadata cue:", e);
-                }
-            });
-        };
+                        const labelText = document.createElement('span');
+                        labelText.className = 'formation-label';
+                        labelText.textContent = formationId;
+                        item.appendChild(labelText);
 
-        // Renderizamos cuando los datos de VTT se hayan cargado
-        metadataTrackEl.addEventListener('load', renderGrid);
+                        const img = document.createElement('img');
+                        img.src = `media/images/formations/${formationId}.png`;
+                        img.alt = data.payload.title;
+                        img.onload = () => { fallbackText.style.display = 'none'; };
+                        img.onerror = () => { img.style.display = 'none'; };
 
-        // Ejecucioón manual por si el track cargó instantáneamente de la caché
-        if (metadataTrack.cues && metadataTrack.cues.length > 0) {
-            renderGrid();
-        } else {
-            // Un fallback ya que algunas veces 'load' no es emitido por el elemento <track> si lo ponemos a 'hidden'
-            metadataTrack.addEventListener('cuechange', renderGrid);
-        }
+                        item.appendChild(img);
 
-        const syncContainer = document.getElementById('synchronized-info');
-        const escudoLabel = document.getElementById('escudo-label');
-        const escudoImg = document.getElementById('escudo-img');
-        const entrenadorLabel = document.getElementById('entrenador-label');
-        const entrenadorImg = document.getElementById('entrenador-img');
-        const equipoLabel = document.getElementById('equipo-label');
-        const equipoImg = document.getElementById('equipo-img');
+                        item.addEventListener('click', () => {
+                            video.currentTime = cue.startTime + 0.1;
+                            video.play().catch(() => { });
+                        });
 
-        const sideInfo = document.getElementById('side-info');
-        const formationText = document.getElementById('formation-text');
-        const tacticsImg = document.getElementById('tactics-img');
-
-        const attrContainer = document.getElementById('attributes-container');
-        const stylesContainer = document.getElementById('styles-container');
-
-        const styleColors = {
-            'posesión': '#3b82f6',
-            'juego posicional': '#8b5cf6',
-            'robo salida': '#f59e0b',
-            'directo': '#ef4444',
-            'contraataque': '#10b981',
-            'presión alta': '#f43fdfff',
-            'juego vertical': '#08a3ebff',
-            'juego interior': '#46ef49ff',
-            'combinativo': '#06b6d4',
-            'juego directo': '#cdbd2fff'
-        };
-
-        const attrMapping = {
-            'alta': { width: '100%', color: '#ef4444' },
-            'ofensiva': { width: '100%', color: '#ef4444' },
-            'media': { width: '50%', color: '#eab308' },
-            'equilibrada': { width: '50%', color: '#eab308' },
-            'baja': { width: '15%', color: '#3b82f6' },
-            'defensiva': { width: '15%', color: '#3b82f6' }
-        };
-
-        const updateBar = (idSuffix, value) => {
-            const valEl = document.getElementById(`val-${idSuffix}`);
-            const fillEl = document.getElementById(`fill-${idSuffix}`);
-            if (valEl && fillEl) {
-                valEl.textContent = value;
-                const normalized = value.toLowerCase();
-                if (attrMapping[normalized]) {
-                    fillEl.style.width = attrMapping[normalized].width;
-                    fillEl.style.backgroundColor = attrMapping[normalized].color;
-                } else {
-                    fillEl.style.width = '0%';
-                }
+                        formationGrid.appendChild(item);
+                    } catch (e) {
+                        console.error("Error al parsear metadata cue:", e);
+                    }
+                });
+            };
+            
+            if (metadataRenderHandler) {
+                metadataTrackEl.removeEventListener('load', metadataRenderHandler);
+                metadataTrack.removeEventListener('cuechange', metadataRenderHandler);
             }
-        };
+            metadataRenderHandler = renderGrid;
 
-        // Marcamos la imagen activa basándonos en el evento cuechange
-        metadataTrack.addEventListener('cuechange', () => {
-            let activeId = null;
-            let activeData = null;
-            if (metadataTrack.activeCues && metadataTrack.activeCues.length > 0) {
-                try {
-                    activeData = JSON.parse(metadataTrack.activeCues[0].text);
-                    activeId = activeData.id;
-                } catch (e) { }
+            // Renderizamos cuando los datos de VTT se hayan cargado
+            metadataTrackEl.addEventListener('load', renderGrid);
+
+            // Ejecucioón manual
+            if (metadataTrack && metadataTrack.cues && metadataTrack.cues.length > 0) {
+                renderGrid();
+            } else {
+                metadataTrack.addEventListener('cuechange', renderGrid);
             }
 
-            const allItems = formationGrid.querySelectorAll('.formation-item');
-            allItems.forEach(item => {
-                if (activeId && item.getAttribute('data-id') === activeId) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
+            const updateBar = (idSuffix, value) => {
+                const valEl = document.getElementById(`val-${idSuffix}`);
+                const fillEl = document.getElementById(`fill-${idSuffix}`);
+                if (valEl && fillEl) {
+                    valEl.textContent = value;
+                    const normalized = value.toLowerCase();
+                    if (attrMapping[normalized]) {
+                        fillEl.style.width = attrMapping[normalized].width;
+                        fillEl.style.backgroundColor = attrMapping[normalized].color;
+                    } else {
+                        fillEl.style.width = '0%';
+                    }
                 }
-            });
+            };
 
-            if (syncContainer) {
-                if (activeData && activeData.payload) {
-                    syncContainer.classList.remove('hidden');
+            if (metadataCueHandler) {
+                metadataTrack.removeEventListener('cuechange', metadataCueHandler);
+            }
+            
+            metadataCueHandler = () => {
+                let activeId = null;
+                let activeData = null;
+                if (metadataTrack.activeCues && metadataTrack.activeCues.length > 0) {
+                    try {
+                        activeData = JSON.parse(metadataTrack.activeCues[0].text);
+                        activeId = activeData.id;
+                    } catch (e) { }
+                }
 
-                    escudoLabel.textContent = activeData.payload.equipo;
-                    escudoImg.src = activeData.payload.imagenes[2];
+                const allItems = formationGrid.querySelectorAll('.formation-item');
+                allItems.forEach(item => {
+                    if (activeId && item.getAttribute('data-id') === activeId) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
 
-                    entrenadorLabel.textContent = activeData.payload.entrenador;
-                    entrenadorImg.src = activeData.payload.imagenes[0];
+                if (syncContainer) {
+                    if (activeData && activeData.payload) {
+                        syncContainer.classList.remove('hidden');
 
-                    equipoLabel.textContent = activeData.payload.año;
-                    equipoImg.src = activeData.payload.imagenes[1];
+                        escudoLabel.textContent = activeData.payload.equipo;
+                        escudoImg.src = activeData.payload.imagenes[2];
 
-                    if (sideInfo) {
-                        sideInfo.classList.remove('hidden');
-                        formationText.textContent = activeData.payload.text || '';
-                        tacticsImg.src = activeData.payload.imagenes[3] || '';
+                        entrenadorLabel.textContent = activeData.payload.entrenador;
+                        entrenadorImg.src = activeData.payload.imagenes[0];
 
-                        if (activeData.payload.orientacion && attrContainer) {
-                            attrContainer.classList.remove('hidden');
-                            updateBar('orientacion', activeData.payload.orientacion);
-                            updateBar('presion', activeData.payload.presion);
-                            updateBar('amplitud', activeData.payload.amplitud);
-                            updateBar('profundidad', activeData.payload.profundidad);
+                        equipoLabel.textContent = activeData.payload.año;
+                        equipoImg.src = activeData.payload.imagenes[1];
 
-                            stylesContainer.innerHTML = '';
-                            if (activeData.payload.estilo && Array.isArray(activeData.payload.estilo)) {
-                                activeData.payload.estilo.forEach(est => {
-                                    const pill = document.createElement('span');
-                                    pill.className = 'style-pill';
-                                    pill.textContent = est;
-                                    pill.style.backgroundColor = styleColors[est.toLowerCase()] || '#6b7280';
-                                    stylesContainer.appendChild(pill);
-                                });
+                        if (sideInfo) {
+                            sideInfo.classList.remove('hidden');
+                            formationText.textContent = activeData.payload.text || '';
+                            tacticsImg.src = activeData.payload.imagenes[3] || '';
+
+                            if (activeData.payload.orientacion && attrContainer) {
+                                attrContainer.classList.remove('hidden');
+                                updateBar('orientacion', activeData.payload.orientacion);
+                                updateBar('presion', activeData.payload.presion);
+                                updateBar('amplitud', activeData.payload.amplitud);
+                                updateBar('profundidad', activeData.payload.profundidad);
+
+                                stylesContainer.innerHTML = '';
+                                if (activeData.payload.estilo && Array.isArray(activeData.payload.estilo)) {
+                                    activeData.payload.estilo.forEach(est => {
+                                        const pill = document.createElement('span');
+                                        pill.className = 'style-pill';
+                                        pill.textContent = est;
+                                        pill.style.backgroundColor = styleColors[est.toLowerCase()] || '#6b7280';
+                                        stylesContainer.appendChild(pill);
+                                    });
+                                }
                             }
                         }
+                    } else {
+                        if (escudoLabel) escudoLabel.textContent = '';
+                        if (escudoImg) escudoImg.src = '';
+                        if (entrenadorLabel) entrenadorLabel.textContent = '';
+                        if (entrenadorImg) entrenadorImg.src = '';
+                        if (equipoLabel) equipoLabel.textContent = '';
+                        if (equipoImg) equipoImg.src = '';
+                        if (formationText) formationText.textContent = '';
+                        if (tacticsImg) tacticsImg.src = '';
                     }
-                } else {
-                    // Limpiamos los textos/imágenes si no hay cue activo pero no ocultamos los contenedores visuales
-                    if (escudoLabel) escudoLabel.textContent = '';
-                    if (escudoImg) escudoImg.src = '';
-                    if (entrenadorLabel) entrenadorLabel.textContent = '';
-                    if (entrenadorImg) entrenadorImg.src = '';
-                    if (equipoLabel) equipoLabel.textContent = '';
-                    if (equipoImg) equipoImg.src = '';
-                    if (formationText) formationText.textContent = '';
-                    if (tacticsImg) tacticsImg.src = '';
                 }
-            }
+            };
+            
+            metadataTrack.addEventListener('cuechange', metadataCueHandler);
+        }
+    };
+    
+    const injectAndSetupTracks = () => {
+        // Desactivar completamente las pistas nativas primero para evitar subtítulos "congelados"
+        if (video.textTracks) {
+            Array.from(video.textTracks).forEach(track => {
+                track.mode = 'disabled';
+            });
+        }
+
+        // Remove old tracks del DOM
+        video.querySelectorAll('track').forEach(t => t.remove());
+
+        // Add new tracks
+        TRACKS_CONFIG.forEach(config => {
+            const trackEl = document.createElement('track');
+            trackEl.src = config.src;
+            trackEl.kind = config.kind;
+            if (config.label) trackEl.label = config.label;
+            if (config.srclang) trackEl.srclang = config.srclang;
+            if (config.default) trackEl.default = true;
+            video.appendChild(trackEl);
         });
-    }
+
+        // Initialize features when the browser TextTracks catch up
+        setTimeout(() => {
+            initSubtitles();
+            initChapters();
+            initMetadata();
+        }, 150); // delay to let browser parse tracks
+    };
+
+    // Initial load setup
+    injectAndSetupTracks();
 });

@@ -364,13 +364,13 @@ video {
     letter-spacing: 0.5px;
 }
 
-#cc-list {
+#cc-list, .menu-list {
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
-#cc-list li {
+#cc-list li, .menu-list li {
     padding: 8px 16px;
     font-size: 0.9rem;
     cursor: pointer;
@@ -379,22 +379,41 @@ video {
     position: relative;
 }
 
-#cc-list li:hover {
+#cc-list li:hover, .menu-list li:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-#cc-list li.active {
+#cc-list li.active, .menu-list li.active {
     background: rgba(59, 130, 246, 0.2);
     color: var(--primary-hover);
     font-weight: 500;
 }
 
-#cc-list li.active::before {
+#cc-list li.active::before, .menu-list li.active::before {
     content: '✓';
     position: absolute;
     left: 8px;
     font-weight: 700;
     font-size: 0.9rem;
+}
+
+.menu-list .menu-item-with-arrow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 16px;
+}
+
+.menu-list .menu-item-back {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+    margin-bottom: 4px;
+    padding-left: 12px;
+}
+
+.menu-list.hidden {
+    display: none;
 }
 
 /* WebVTT override */
