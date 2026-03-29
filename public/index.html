@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Formations</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="glass-panel" style="margin-bottom: 24px;">
+            <h2 class="side-info-title">Formaciones</h2>
+            <div id="formation-grid" class="formation-grid"></div> <!-- Los elementos se generarán por JavaScript -->
+        </div>
+
+        <div class="main-content-layout">
+            <figure id="video-wrapper" class="video-container">
+                <video id="video-player" preload="metadata" poster="media/preview/thumbnail.jpg" playsinline
+                    controls>
+                        <source src="media/videos/video_1080p.webm" type="video/webm">
+                        <source src="media/videos/video_1080p.mp4" type="video/mp4">
+                        <track src="media/subs/subs_esp.vtt" kind="subtitles" srclang="es" label="Español" default>
+                        <track src="media/subs/subs_eng.vtt" kind="subtitles" srclang="en" label="English">
+                        <track src="media/subs/subs_cat.vtt" kind="subtitles" srclang="ca" label="Català">
+                        <track src="media/subs/subs_ger.vtt" kind="subtitles" srclang="de" label="Deutsch">
+                        <track src="media/vtt/chapters.vtt" kind="chapters" srclang="es" label="Capítulos" default>
+                        <track src="media/vtt/metadata.vtt" kind="metadata" label="Metadata">
+                        <p>Fallback: Su navegador no soporta HTML5. <a href="media/videos/video_1080p.mp4">Descargue el
+                                archivo</a>.</p>
+                    </video>
+
+                    <div id="error-overlay" class="overlay hidden">
+                        <span class="material-symbols-rounded overlay-icon">error</span>
+                        <p id="error-message">Ha ocurrido un error reproduciendo el vídeo.</p>
+                    </div>
+
+                    <div id="loading-overlay" class="overlay hidden">
+                        <div class="spinner"></div>
+                    </div>
+
+                    <div id="video-controls" class="controls-container" data-state="hidden" style="display: none;">
+                        <div class="progress-wrapper" id="progress-wrapper">
+                            <div id="chapters-container" class="chapters-container"></div>
+                            <div id="chapter-hover-highlight" class="chapter-hover-highlight hidden"></div>
+                            <div id="chapter-tooltip" class="chapter-tooltip hidden"></div>
+                            <input type="range" id="progress-bar" class="progress-bar" min="0" max="100" value="0"
+                                step="0.1">
+                            <div class="progress-filled" id="progress-filled"></div>
+                        </div>
+
+                        <div class="controls-main">
+                            <div class="controls-left">
+                                <button id="play-pause-btn" class="control-btn" title="Reproducir/Pausar">
+                                    <span class="material-symbols-rounded">play_arrow</span>
+                                </button>
+
+                                <div class="volume-container">
+                                    <button id="mute-btn" class="control-btn" title="Silenciar">
+                                        <span class="material-symbols-rounded">volume_up</span>
+                                    </button>
+                                    <input type="range" id="volume-slider" class="volume-slider" min="0" max="1"
+                                        step="0.05" value="0.5">
+                                </div>
+
+                                <div class="time-display">
+                                    <span id="current-time">00:00</span> / <span id="duration">00:00</span>
+                                </div>
+                            </div>
+
+                            <div class="controls-right">
+                                <div class="cc-container">
+                                    <button id="cc-btn" class="control-btn" title="Subtítulos">
+                                        <span class="material-symbols-rounded">closed_caption</span>
+                                    </button>
+                                    <div id="cc-menu" class="cc-menu hidden">
+                                        <div class="cc-header">Subtítulos</div>
+                                        <ul id="cc-list">
+                                            <!-- Los elementos li se generarán por JavaScript -->
+                                        </ul>
+                                    </div>
+                                </div>
+                                <button id="fullscreen-btn" class="control-btn" title="Pantalla completa">
+                                    <span class="material-symbols-rounded">fullscreen</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </figure>
+
+                <div class="glass-panel" id="ejemplo-section">
+                    <h2 class="side-info-title" style="margin-top: 0;">Ejemplo</h2>
+                    <div id="synchronized-info" class="sync-info-container">
+                        <div class="sync-item">
+                            <span class="sync-label" id="escudo-label"></span>
+                            <img id="escudo-img" src="" alt="Escudo">
+                        </div>
+                        <div class="sync-item">
+                            <span class="sync-label" id="entrenador-label"></span>
+                            <img id="entrenador-img" src="" alt="Entrenador">
+                        </div>
+                        <div class="sync-item">
+                            <span class="sync-label" id="equipo-label"></span>
+                            <img id="equipo-img" src="" alt="Jugadores">
+                        </div>
+                    </div>
+                </div>
+
+            <aside id="side-info" class="side-info-section">
+                <h2 class="side-info-title">Info</h2>
+                <div class="side-info-content">
+                    <p id="formation-text" class="formation-text"></p>
+
+                    <div id="attributes-container" class="attributes-container">
+                        <div id="styles-container" class="styles-container"></div>
+                        <div id="bars-container" class="bars-container">
+                            <div class="attr-row">
+                                <span class="attr-label">Orientación</span>
+                                <div class="attr-bar-wrapper">
+                                    <span class="attr-value-text" id="val-orientacion">Ofensiva</span>
+                                    <div class="attr-bar">
+                                        <div class="attr-fill" id="fill-orientacion"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="attr-row">
+                                <span class="attr-label">Presión</span>
+                                <div class="attr-bar-wrapper">
+                                    <span class="attr-value-text" id="val-presion">Alta</span>
+                                    <div class="attr-bar">
+                                        <div class="attr-fill" id="fill-presion"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="attr-row">
+                                <span class="attr-label">Amplitud</span>
+                                <div class="attr-bar-wrapper">
+                                    <span class="attr-value-text" id="val-amplitud">Equilibrada</span>
+                                    <div class="attr-bar">
+                                        <div class="attr-fill" id="fill-amplitud"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="attr-row">
+                                <span class="attr-label">Profundidad</span>
+                                <div class="attr-bar-wrapper">
+                                    <span class="attr-value-text" id="val-profundidad">Baja</span>
+                                    <div class="attr-bar">
+                                        <div class="attr-fill" id="fill-profundidad"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <img id="tactics-img" src="" alt="Tactics" class="tactics-img">
+                </div>
+            </aside>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

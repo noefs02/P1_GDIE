@@ -1,0 +1,426 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:30.000
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 4-3-3",
+    "text": "Diseñada para la presión y el fútbol de ataque. Usa 4 defensas, 3 mediocampistas y 3 atacantes.",
+    "orientacion": "ofensiva",
+    "presion": "alta",
+    "estilo": ["posesión", "juego posicional"],
+    "amplitud": "alta",
+    "profundidad": "equilibrada",
+    "entrenador": "Pep Guardiola",
+    "equipo": "Barcelona",
+    "año": "2009-2012",
+    "imagenes": [
+      "/media/images/coach/guardiola.webp",
+      "/media/images/teams/barça2009.webp",
+      "/media/images/badges/barcelona.png",
+      "/media/images/tactics/tactics4-3-3.webp"
+    ]
+  },
+  "id": "fmt-4-3-3"
+}
+
+00:00:30.000 --> 00:00:58.500
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 4-2-3-1",
+    "text": "Equilibrada, flexible y adaptable a estilos de presión o contraataque. Utiliza un doble pivote defensivo.",
+    "orientacion": "ofensiva",
+    "presion": "alta",
+    "estilo": ["robo salida", "juego posicional"],
+    "amplitud": "equilibrada",
+    "profundidad": "equilibrada",
+    "entrenador": "Hansi Flick",
+    "equipo": "Bayern München",
+    "año": "2020",
+    "imagenes": [
+      "/media/images/coach/flick.webp",
+      "/media/images/teams/bayern.webp",
+      "/media/images/badges/bayern-munich.png",
+      "/media/images/tactics/tactics4-2-3-1.webp"
+    ]
+  },
+  "id": "fmt-4-2-3-1"
+}
+
+00:00:58.500 --> 00:01:29.000
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 4-4-2",
+    "text": "Simple, fácil de entender y no requiere tácticas complicadas. Muy organizada y solida, con dos líneas de cuatro.",
+    "orientacion": "equilibrada",
+    "presion": "media",
+    "estilo": ["juego directo", "contraataque"],
+    "amplitud": "equilibrada",
+    "profundidad": "baja",
+    "entrenador": "Diego Simeone",
+    "equipo": "Atlético de Madrid",
+    "año": "2011-Actualidad",
+    "imagenes": [
+      "/media/images/coach/simeone.webp",
+      "/media/images/teams/atletico-madrid.webp",
+      "/media/images/badges/atletico-madrid.png",
+      "/media/images/tactics/tactics4-4-2.webp"
+    ]
+  },
+  "id": "fmt-4-4-2"
+}
+
+00:01:29.000 --> 00:01:56.500
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 4-1-2-1-2",
+    "text": "Excelente para controlar las áreas centrales, aunque puede quedar expuesta en las bandas.",
+    "orientacion": "equilibrada",
+    "presion": "media",
+    "estilo": ["contraataque", "robo salida"],
+    "amplitud": "baja",
+    "profundidad": "baja",
+    "entrenador": "Ancelotti",
+    "equipo": "Real Madrid",
+    "año": "2014,2024-2025",
+    "imagenes": [
+      "/media/images/coach/anchelotti2.webp",
+      "/media/images/teams/madrid2014.webp",
+      "/media/images/badges/madrid.png",
+      "/media/images/tactics/tactics4-1-2-1-2.webp"
+    ]
+  },
+  "id": "fmt-4-1-2-1-2"
+}
+
+00:01:56.500 --> 00:02:25.000
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 4-1-4-1",
+    "text": "Simple, estable y buena para configuraciones defensivas. Difícil de penetrar.",
+    "orientacion": "equilibrada",
+    "presion": "baja",
+    "estilo": ["posesión", "juego posicional"],
+    "amplitud": "alta",
+    "profundidad": "baja",
+    "entrenador": "Arteta",
+    "equipo": "Arsenal",
+    "año": "2025",
+    "imagenes": [
+      "/media/images/coach/arteta.webp",
+      "/media/images/teams/arsenal.webp",
+      "/media/images/badges/arsenal.png",
+      "/media/images/tactics/tactics4-1-4-1.webp"
+    ]
+  },
+  "id": "fmt-4-1-4-1"
+}
+
+00:02:25.000 --> 00:02:54.000
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 4-5-1",
+    "text": "Requiere disciplina y estructura. Muy sólida defensivamente y permite contraataques rápidos.",
+    "orientacion": "defensiva",
+    "presion": "baja",
+    "estilo": ["contraataque"],
+    "amplitud": "alta",
+    "profundidad": "baja",
+    "entrenador": "Roy Hodgson",
+    "equipo": "Crystal Palace",
+    "año": "2023",
+    "imagenes": [
+      "/media/images/coach/hogson.webp",
+      "/media/images/teams/crystal-palace.webp",
+      "/media/images/badges/crystal-palace.png",
+      "/media/images/tactics/tactics4-5-1.webp"
+    ]
+  },
+  "id": "fmt-4-5-1"
+}
+
+00:02:54.000 --> 00:03:25.000
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 4-2-2-2",
+    "text": "Formación agresiva y estrecha. Tener 2 delanteros significa que siempre hay amenaza de gol.",
+    "orientacion": "ofensiva",
+    "presion": "alta",
+    "estilo": ["presión alta", "juego vertical"],
+    "amplitud": "baja",
+    "profundidad": "alta",
+    "entrenador": "Ralph Hasenhüttl",
+    "equipo": "RB Leipzig",
+    "año": "2016-2018",
+    "imagenes": [
+      "/media/images/coach/hasenhuttl.webp",
+      "/media/images/teams/leipzig.webp",
+      "/media/images/badges/leibzig.png",
+      "/media/images/tactics/tactics4-2-2-2.webp"
+    ]
+  },
+  "id": "fmt-4-2-2-2"
+}
+
+00:03:25.000 --> 00:03:56.500
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 4-3-2-1",
+    "text": "Diseñada para controlar el mediocampo y limitar los espacios del oponente.",
+    "orientacion": "ofensiva",
+    "presion": "media",
+    "estilo": ["juego posicional"],
+    "amplitud": "baja",
+    "profundidad": "equilibrada",
+    "entrenador": "Ancelotti",
+    "equipo": "AC Milan",
+    "año": "2005",
+    "imagenes": [
+      "/media/images/coach/anchelotti1.webp",
+      "/media/images/teams/milan.webp",
+      "/media/images/badges/milan.png",
+      "/media/images/tactics/tactics4-3-2-1.webp"
+    ]
+  },
+  "id": "fmt-4-3-2-1"
+}
+
+00:03:56.500 --> 00:04:22.500
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 4-1-2-3",
+    "text": "Sistema basado en la posesión. Ideal para equipos que buscan control y fluidez.",
+    "orientacion": "ofensiva",
+    "presion": "alta",
+    "estilo": ["posesión", "juego posicional"],
+    "amplitud": "alta",
+    "profundidad": "alta",
+    "entrenador": "Pep Guardiola",
+    "equipo": "Manchester City",
+    "año": "2020-2021",
+    "imagenes": [
+      "/media/images/coach/gurdiola2.webp",
+      "/media/images/teams/city2021.webp",
+      "/media/images/badges/city.png",
+      "/media/images/tactics/tactics4-1-2-3.webp"
+    ]
+  },
+  "id": "fmt-4-1-2-3"
+}
+
+00:04:22.500 --> 00:04:51.000
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 3-4-3",
+    "text": "Sistema excelente para presionar. Permite controlar la posesión manteniendo una gran amenaza ofensiva.",
+    "orientacion": "ofensiva",
+    "presion": "alta",
+    "estilo": ["juego posicional", "posesión"],
+    "amplitud": "alta",
+    "profundidad": "alta",
+    "entrenador": "Cruyff",
+    "equipo": "Barcelona Dream Team",
+    "año": "1988-1996",
+    "imagenes": [
+      "/media/images/coach/cruyff.webp",
+      "/media/images/teams/barcadreamteam.webp",
+      "/media/images/badges/barcelona.png",
+      "/media/images/tactics/tactics3-4-3.webp"
+    ]
+  },
+  "id": "fmt-3-4-3"
+}
+
+00:04:51.000 --> 00:05:19.500
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 3-5-2",
+    "text": "Efectiva para contraataques gracias a la superposición de carrileros y sus 2 delanteros.",
+    "orientacion": "defensiva",
+    "presion": "media",
+    "estilo": ["contraataque"],
+    "amplitud": "alta",
+    "profundidad": "equilibrada",
+    "entrenador": "Antonio Conte",
+    "equipo": "Inter Milan",
+    "año": "2019-2021",
+    "imagenes": [
+      "/media/images/coach/conte.webp",
+      "/media/images/teams/inter.webp",
+      "/media/images/badges/inter.png",
+      "/media/images/tactics/tactics3-5-2.webp"
+    ]
+  },
+  "id": "fmt-3-5-2"
+}
+
+00:05:19.500 --> 00:05:44.500
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 3-4-1-2",
+    "text": "Sistema flexible. Muy sólido al defender y peligroso al atacar gracias al mediapunta (número 10).",
+    "orientacion": "equilibrada",
+    "presion": "media",
+    "estilo": ["juego interior", "combinativo"],
+    "amplitud": "equilibrada",
+    "profundidad": "equilibrada",
+    "entrenador": "Gian Piero Gasperini",
+    "equipo": "Atalanta BC",
+    "año": "2016-2025",
+    "imagenes": [
+      "/media/images/coach/gasperini.webp",
+      "/media/images/teams/atalanta.webp",
+      "/media/images/badges/atalanta.png",
+      "/media/images/tactics/tactics3-4-1-2.webp"
+    ]
+  },
+  "id": "fmt-3-4-1-2"
+}
+
+00:05:44.500 --> 00:06:15.500
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 3-2-4-1",
+    "text": "Diseñada para presión constante y posesión. Busca mantener el balón muy arriba en el campo.",
+    "orientacion": "ofensiva",
+    "presion": "alta",
+    "estilo": ["posesión", "juego posicional"],
+    "amplitud": "alta",
+    "profundidad": "media",
+    "entrenador": "Pep Guardiola",
+    "equipo": "Manchester City",
+    "año": "2022-2023",
+    "imagenes": [
+      "/media/images/coach/gurdiola2.webp",
+      "/media/images/teams/city2023.webp",
+      "/media/images/badges/city.png",
+      "/media/images/tactics/tactics3-2-4-1.webp"
+    ]
+  },
+  "id": "fmt-3-2-4-1"
+}
+
+00:06:15.500 --> 00:06:41.000
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 3-4-2-1",
+    "text": "Sistema flexible que otorga apoyo defensivo y suma mucha gente en ataque con sus dos mediapuntas.",
+    "orientacion": "ofensiva",
+    "presion": "alta",
+    "estilo": ["juego posicional", "presión alta"],
+    "amplitud": "alta",
+    "profundidad": "alta",
+    "entrenador": "Thomas Tuchel",
+    "equipo": "Chelsea FC",
+    "año": "2021-2022",
+    "imagenes": [
+      "/media/images/coach/tuchel.webp",
+      "/media/images/teams/chelsea.webp",
+      "/media/images/badges/chelsea.png",
+      "/media/images/tactics/tactics3-4-2-1.webp"
+    ]
+  },
+  "id": "fmt-3-4-2-1"
+}
+
+00:06:41.000 --> 00:07:02.500
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 5-3-2",
+    "text": "Sistema defensivo que permite a los equipos ser compactos y golpear al oponente en el contraataque.",
+    "orientacion": "defensiva",
+    "presion": "baja",
+    "estilo": ["contraataque"],
+    "amplitud": "equilibrada",
+    "profundidad": "baja",
+    "entrenador": "Mourinho",
+    "equipo": "AS Roma",
+    "año": "2024",
+    "imagenes": [
+      "/media/images/coach/mourinho.webp",
+      "/media/images/teams/roma.webp",
+      "/media/images/badges/roma.png",
+      "/media/images/tactics/tactics5-3-2.webp"
+    ]
+  },
+  "id": "fmt-5-3-2"
+}
+
+00:07:02.500 --> 00:07:30.500
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 5-4-1",
+    "text": "Configuración extremadamente defensiva. Sacrifica números en ataque por pura seguridad en defensa.",
+    "orientacion": "defensiva",
+    "presion": "baja",
+    "estilo": ["contraataque"],
+    "amplitud": "alta",
+    "profundidad": "baja",
+    "entrenador": "Bordalás",
+    "equipo": "Getafe",
+    "año": "2023-Actualidad",
+    "imagenes": [
+      "/media/images/coach/bordalas.webp",
+      "/media/images/teams/getafe.webp",
+      "/media/images/badges/getafe.png",
+      "/media/images/tactics/tactics5-4-1.webp"
+    ]
+  },
+  "id": "fmt-5-4-1"
+}
+
+00:07:30.500 --> 00:08:00.000
+{
+  "type": "info",
+  "action": "show_overlay",
+  "payload": {
+    "title": "Formación 5-2-3",
+    "text": "Útil para equipos que quieren defender sólidamente mientras mantienen una fuerte amenaza en ataque.",
+    "orientacion": "equilibrada",
+    "presion": "media",
+    "estilo": ["contraataque", "juego directo"],
+    "amplitud": "alta",
+    "profundidad": "alta",
+    "entrenador": "Didier Deschamps",
+    "equipo": "France national team",
+    "año": "2012-2017",
+    "imagenes": [
+      "/media/images/coach/deshamps.webp",
+      "/media/images/teams/france.webp",
+      "/media/images/badges/france.png",
+      "/media/images/tactics/tactics5-2-3.webp"
+    ]
+  },
+  "id": "fmt-5-2-3"
+}
